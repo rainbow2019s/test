@@ -1,0 +1,246 @@
+NoHttp主页和文档地址
+
+http://www.nohttp.net
+http://doc.nohttp.net
+http://github.com/yanhenjie/NoHttp
+
+Eclipse Jar
+Gradle compile 'com.yolands.nohttp;1.0.2'
+
+NoHttp特性
+
+1）实现了Htp 1.1(RFC2616),一个标准的Http框架。
+2）请求和下载都是队列，平均分配每个线程的资源，支持多个请求并发
+3）支持GET
+4）支持基于POST
+5）文件下载
+6）提供五种数据缓存策略
+   a） 仅仅请求网络
+   b） 仅仅请取缓存
+   c） 标准HTTP协议缓存（比如响应码是304的情况，需要服务器支持，如果服务器不支持就和普通请求一样）
+   d） 先请求网络，请求失败后返回缓存
+   e） 先读取缓存，缓存不存在现请求网络
+   
+7）支持自定义Request
+8）
+
+请求
+
+1）支持请求String、Json、FastJson、Gson、Bitmap、JavaBean、XML等扩展
+2) 异步请求（通过回调更新UI),支持同步请求（在子线程下请求不需要回调）
+
+
+
+代理
+
+-----------------------------------------------------
+
+NoHttp和
+OkHttp（效率最高）
+retrofit 请求的数据直接转换为Java对象
+
+
+step1: 添加依赖库
+
+dependencies {
+   ...
+   compile 'com.yolanda.nohttp:nohttp:1.0.6'
+}
+
+step2: MyApplication extends Application{
+    public void onCreate(){
+	   super.onCreate();
+	   ...
+	   NoHttp.initialize(this);
+    }
+}
+
+
+step3
+
+3.1 创建请求队列
+requestQueue = NoHttp.newRequestQueue();
+
+3.2 创建请求对象
+// RequestMethod.POST
+
+Request<String> stringRequest=NoHttp.createStringRequest("http://xxx");
+requestQueue.add(1,stringRequest,new SimpleResponseListener<String>()｛
+  @Override
+  public void onSucceed(int what,Response<String> response){
+      ..
+	  // response.get();
+  }
+
+  @Override
+  public void onFailed(int what,String url,Object tag,Exception exception,
+	int responseCode,long networkMillis){
+    ..
+  }
+｝
+
+
+
+public class MainActivity extends Activity {
+	
+	private RequestQueue requestQueue;
+	
+	private TextView textView;
+
+	@Override
+	protected void onCreate(Bundle savedInstanceState) {
+		super.onCreate(savedInstanceState);
+		setContentView(R.layout.activity_main);
+		
+		textView=(TextView)findViewById(R.id.txtHtml);
+		
+		requestQueue=NoHttp.newRequestQueue();
+		
+		test();
+	}
+	
+	
+	private void test(){
+		
+		Request<String> stringRequest=NoHttp.createStringRequest("http://m.jd.com", 
+				RequestMethod.GET);
+		requestQueue.add(1,stringRequest,new SimpleResponseListener<String>(){
+			
+			@Override
+			public void onSucceed(int what,Response<String> response){
+				
+				//Log.i("APP",response.get());
+				textView.setText(response.get());
+				
+			}
+			
+			//@Override
+//			public void onFailed(int what,String url,Object tag,Exception exception,
+//					int responseCode,long networkMillis){
+//				
+//			}
+
+		});
+		
+	}
+	
+3.3 发起请求/添加到请求队列
+
+
+class MyOnResponseListener extends SimpleResponse<Bitmap>{
+
+   @Override
+   public void onSucceed(int what,Response<Bitmap> response){
+      if(what==1){
+	     //
+	  }else if(what == 2){
+
+	  }
+   }
+
+
+
+   File storage = Environment
+								.getExternalStorageDirectory();
+		File file=new File(path);
+		if(!file.exists()){
+			file.mkdirs();
+		}
+
+
+
+
+图片缓存
+
+数据缓存
+
+1）创建请求队列
+requestQueue=NoHttp.newRequestQueue();
+2）创建请求对象
+Request<String> stringRequest=NoHttp.createStringRequest(url)
+
+//Http标准协议的缓存
+stringRequest.setCacheMode(CacheMode.DEFAULT);
+//请求网络失败后返回上次的缓存
+stringRequest.setCacheMode(CacheMode.REQUEST_NETWORK_FAILD_READ_CACHE);
+//没有缓存才去请求数据
+stringRequest.setCacheMode(CacheMode.NONE_CACHE_REQUEST_NETWORK);
+//仅仅请求缓存(如果之前没有缓存，结果就会失败）
+stringRequest.setCacheMode(CacheMode.ONLY_READ_CACHE);
+//仅仅请求网络
+stringRequest.setCacheMode(CacheMode.ONLY_REQUEST_NETWORK);
+
+3）添加到请求队列中
+requestQueue.add(1,stringRequest,
+  new SimpleResponseListener<String>(){
+  
+	@Override
+	public void onSucceed(int what,Response<String> response){
+
+	}
+  });
+
+
+
+
+NoHttp与OkHttp比较：NoHttp容易理解
+
+XUtils3 对低版本Android兼容不太好，最低支持Android 4.0 
+XUtils 对高版本Android兼容不太好,因此推出XUtils3
+
+NoHttp底层是 HttpURLConnection 最低兼容版本9
+
+volley Xutils3.0
+NoHttp OkHttp
+AsyncHttpClient
+
+NoHttp->Retrofit>OkHttp
+Volley 频繁小的请求，不支持大数据请求
+
+
+打开工程的gradle->wrapper->gradle-wrapper.properties
+   设置已本地缓存的gradle版本 gradle-2.10-all.zip
+
+
+volley UrlConnection okhttp  httpclient
+volley api>9  HttpUrlConnection api<9 httpClient
+编译版本<=22
+
+对HTTPS支持
+SSLContext sslContext=SSLContextUtil.getSSLContext();
+if(sslContext!=null){
+   httpsRequest.setSSLSocketFactory(sslContext.getSocketFactory());
+}
+
+CallServer.getRequestInstance().add(this,0,httpsRequest,this,false,true);
+
+自带一个证书
+
+
+
+
+
+
+
+gladle 本地分发
+Setting->Build,Execution,Deployment
+  Build Tools
+     Gradle
+	   [*]Use local gradle distribution 
+	       指向Android Studio 安装路径
+		   D:/Android/androidstudio/gradle/gradle-2.10
+
+	   [*]Offline work 库不再更新时 
+          Service directory path
+
+
+图片框架
+
+ARGB_8888
+RGB_565
+
+Freso(GIF)
+Universal-Image-Loader
+Picasso
+Glide(GIF)
+
