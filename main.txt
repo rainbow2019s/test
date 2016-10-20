@@ -1,0 +1,90 @@
+
+
+函数（方法），实现某项功能或服务的代码块
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+[Jade]11 mixins代码块
+
+相当于一个函数
+
+mixin lesson
+  p imooc jade study
+
++lesson
+
+mixin 参数
+mixin study(name,courses)
+  p #{name}
+  ul.courses
+    each course in courses
+	  li= course  安全转义
+
++study('tom',['jade','node'])
+
+mixin 嵌套
+mixin group(student)
+  h4 #{student.name}
+  +study(student.name,student.courses)
+
++group({name:'tom',courses:['jade','node']})
+
+
+mixin 内联代码块
+mixin team(slogon)
+  h4 #{slogon}
+  if block
+     block
+  else
+     p no team
+
++team('slogon')
+  p Good job!
+
+minxin 传递属性
+mixin attr(name)
+  p(class!=attributes.class) #{name}  不进行2次转义
+
++attr('attr')(class='magic')
+
+<p class="magic">attr</p>
+
+
+minxin attrs(name)
+  p&attributes(attributes) #{name}
+
++attrs('attrs')(class='magic2',id='attrid')
+
+
+mixin 可变参数
+mixin magic(name,...items)
+  ul(class='#{name}')
+    each item in items
+	  li= item
+
++magic('magic','node','jade','...')
+
+
+
+
+模板继承
+
+doctype html
+	head
+		title
+	body
+		block desc  默认不调用会输出p标签
+			p jade
+		
